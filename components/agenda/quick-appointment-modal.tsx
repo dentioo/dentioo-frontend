@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { Save, ArrowLeft, X } from "lucide-react"
 import { PatientSelect } from "@/components/ui/patient-select"
 import { ConfirmModal } from "@/components/ui/confirm-modal"
+import { fromDateTimeLocalToUTC } from "@/lib/date-utils"
 
 interface Appointment {
   id: string
@@ -99,8 +100,6 @@ export function QuickAppointmentModal({ isOpen, onClose, appointment, selectedDa
         ? `${apiUrl}/api/appointments/${appointment.id}`
         : `${apiUrl}/api/appointments`
       const method = appointment ? "PUT" : "POST"
-      
-      const { fromDateTimeLocalToUTC } = await import('@/lib/date-utils')
 
       const response = await fetch(url, {
         method,
