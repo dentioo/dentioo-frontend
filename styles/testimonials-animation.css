@@ -1,0 +1,47 @@
+.testimonials-container {
+  width: 100%;
+  overflow: hidden;
+  padding: 0 1rem;
+}
+
+.testimonials-scroll {
+  display: flex;
+  gap: 1.5rem;
+  animation: scroll 30s linear infinite;
+  width: fit-content;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Pause animation on hover */
+.testimonials-scroll:hover {
+  animation-play-state: paused;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 640px) {
+  .testimonials-scroll {
+    gap: 1rem;
+    animation: scroll-mobile 20s linear infinite;
+  }
+
+  @keyframes scroll-mobile {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .testimonials-scroll:hover {
+    animation-play-state: paused;
+  }
+}
