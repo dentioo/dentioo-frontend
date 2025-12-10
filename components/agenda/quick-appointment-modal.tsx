@@ -99,6 +99,8 @@ export function QuickAppointmentModal({ isOpen, onClose, appointment, selectedDa
         ? `${apiUrl}/api/appointments/${appointment.id}`
         : `${apiUrl}/api/appointments`
       const method = appointment ? "PUT" : "POST"
+      
+      const { fromDateTimeLocalToUTC } = await import('@/lib/date-utils')
 
       const response = await fetch(url, {
         method,
@@ -106,7 +108,11 @@ export function QuickAppointmentModal({ isOpen, onClose, appointment, selectedDa
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          start_time: fromDateTimeLocalToUTC(formData.start_time),
+          end_time: fromDateTimeLocalToUTC(formData.end_time),
+        }),
       })
 
       if (!response.ok) {

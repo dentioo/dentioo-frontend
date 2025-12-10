@@ -100,22 +100,64 @@ export function formatDateShort(dateString: string): string {
 /**
  * Converte uma data/hora ISO string para formato datetime-local (YYYY-MM-DDTHH:mm)
  * Usado em inputs type="datetime-local"
+ * Converte de UTC para horário de Brasília antes de formatar
  */
 export function toDateTimeLocal(dateString: string): string {
   try {
     const date = new Date(dateString)
     
-    // Obter componentes locais
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2, '0')
-    const hours = String(date.getHours()).padStart(2, '0')
-    const minutes = String(date.getMinutes()).padStart(2, '0')
+    // Converter para horário de Brasília primeiro
+    const formatter = new Intl.DateTimeFormat('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    })
     
-    return `${year}-${month}-${day}T${hours}:${minutes}`
+    const parts = formatter.formatToParts(date)
+    const year = parts.find(p => p.type === 'year')?.value || ''
+    const month = parts.find(p => p.type === 'month')?.value || ''
+    const day = parts.find(p => p.type === 'day')?.value || ''
+    const hour = parts.find(p => p.type === 'hour')?.value || ''
+    const minute = parts.find(p => p.type === 'minute')?.value || ''
+    
+    return `${year}-${month}-${day}T${hour}:${minute}`
   } catch (error) {
     console.error('Erro ao converter para datetime-local:', error)
     return dateString.slice(0, 16) // Fallback: pegar apenas os primeiros 16 caracteres
+  }
+}
+
+/**
+ * Converte um datetime-local (YYYY-MM-DDTHH:mm) para ISO string UTC
+ * Assume que o datetime-local está em horário de Brasília (UTC-3)
+ * Usado antes de enviar dados para o backend
+ */
+export function fromDateTimeLocalToUTC(datetimeLocal: string): string {
+  try {
+    if (!datetimeLocal) return datetimeLocal
+    
+    // datetime-local vem no formato YYYY-MM-DDTHH:mm (sem timezone)
+    // Assumimos que está em horário de Brasília (UTC-3)
+    const [datePart, timePart] = datetimeLocal.split('T')
+    const [year, month, day] = datePart.split('-').map(Number)
+    const [hours, minutes] = timePart.split(':').map(Number)
+    
+    // Criar data como se fosse UTC, mas ajustar para Brasília
+    // Horário de Brasília = UTC - 3 horas
+    // Então UTC = Horário de Brasília + 3 horas
+    const dateUTC = new Date(Date.UTC(year, month - 1, day, hours, minutes))
+    
+    // Adicionar 3 horas para converter de Brasília para UTC
+    const dateWithOffset = new Date(dateUTC.getTime() + 3 * 60 * 60 * 1000)
+    
+    return dateWithOffset.toISOString()
+  } catch (error) {
+    console.error('Erro ao converter datetime-local para UTC:', error)
+    return datetimeLocal
   }
 }
 
