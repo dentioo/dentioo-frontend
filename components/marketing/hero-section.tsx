@@ -171,7 +171,8 @@ export function HeroSection() {
             {/* Heading */}
             <div className="space-y-4">
               <h1 className="text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-900 leading-tight">
-                Gerencie sua clínica com{' '}
+                Gerencie sua clínica<br className="hidden lg:block" />
+                {' '}com{' '}
                 <span className="relative inline-block">
                   <span className="relative z-10 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                     inteligência
