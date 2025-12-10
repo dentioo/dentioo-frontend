@@ -575,7 +575,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                     onClose()
                   }
                 }}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-red-600 hover:bg-red-50"
+                className="w-full flex items-center gap-3 px-4 py-3 pb-6 lg:pb-3 rounded-lg transition-colors text-red-600 hover:bg-red-50"
               >
                 <LogOut size={20} />
                 <span className="font-medium">Desconectar</span>
