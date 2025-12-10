@@ -2,6 +2,7 @@
 
 import { Menu, Bell, User, LogOut, Clock, LayoutGrid, Users, Calendar, FileText, DollarSign, Folder, Settings, Key, Shield, ChevronLeft } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
+import { formatTime } from "@/lib/date-utils"
 // Itens de menu da sidebar para busca global
 const dashboardMenuItems = [
   { href: "/dashboard/insights", label: "Insights", icon: LayoutGrid },
@@ -212,19 +213,6 @@ export function Navbar({ onMenuClick, userName = "Usuário", sidebarOpen = true 
     }
   };
 
-  // Função para formatar o horário
-  const formatTime = (dateString: string): string => {
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleTimeString('pt-BR', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: false 
-      });
-    } catch {
-      return dateString;
-    }
-  };
 
   const handleNotificationClick = () => {
     setShowNotifications(!showNotifications);

@@ -20,6 +20,7 @@ import {
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { QuickAppointmentModal } from "@/components/agenda/quick-appointment-modal"
+import { formatTime, formatDateShort } from "@/lib/date-utils"
 
 type ViewMode = "day" | "week" | "month"
 type TabMode = "agenda" | "lista" | "stats"
@@ -241,7 +242,7 @@ export default function AgendaPage() {
                 }}
               >
                 <p className="font-semibold truncate">
-                  {new Date(apt.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                  {formatTime(apt.start_time)}
                 </p>
                 <p className="truncate font-medium">{apt.patient_name}</p>
               </div>
@@ -313,17 +314,12 @@ export default function AgendaPage() {
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <CalendarIcon size={14} className="text-gray-400" />
-                    <span>{new Date(apt.start_time).toLocaleDateString('pt-BR', { 
-                      weekday: 'short',
-                      day: '2-digit', 
-                      month: 'short' 
-                    })}</span>
+                    <span>{formatDateShort(apt.start_time)}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Clock size={14} className="text-gray-400" />
                     <span>
-                      {new Date(apt.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} - {' '}
-                      {new Date(apt.end_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                      {formatTime(apt.start_time)} - {formatTime(apt.end_time)}
                     </span>
                   </div>
                 </div>
@@ -375,7 +371,7 @@ export default function AgendaPage() {
                 }}
               >
                 <p className="font-semibold">
-                  {new Date(apt.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                  {formatTime(apt.start_time)}
                 </p>
                 <p className="truncate font-medium">{apt.patient_name}</p>
               </div>
@@ -432,8 +428,7 @@ export default function AgendaPage() {
                       <p className="font-bold text-gray-900 text-lg mb-1">{apt.patient_name}</p>
                       <p className="text-gray-600 mb-2">{apt.title}</p>
                       <p className="text-sm text-gray-500">
-                        {new Date(apt.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} - {' '}
-                        {new Date(apt.end_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                        {formatTime(apt.start_time)} - {formatTime(apt.end_time)}
                       </p>
                     </div>
                   </div>

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { ChevronLeft, ChevronRight, Plus, Search } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { QuickAppointmentModal } from "./quick-appointment-modal"
+import { formatTime } from "@/lib/date-utils"
 
 type ViewMode = "day" | "week" | "month"
 type TabMode = "agenda" | "lista"
@@ -267,7 +268,7 @@ export function AgendaView() {
                 }}
               >
                 <p className="font-medium">
-                  {new Date(apt.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                  {formatTime(apt.start_time)}
                 </p>
                 <p className="truncate">{apt.patient_name}</p>
               </div>
