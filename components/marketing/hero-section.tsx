@@ -154,7 +154,7 @@ export function HeroSection() {
       <div className="absolute top-0 right-0 w-96 h-96 bg-blue-200/20 rounded-full blur-3xl -z-10"></div>
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl -z-10"></div>
       
-      <div className="relative max-w-[100rem] mx-auto px-3 sm:px-3 lg:px-4 pt-20 lg:pt-[75px] pb-16 lg:pb-32 z-10">
+      <div className="relative max-w-[100rem] mx-auto px-3 sm:px-3 lg:px-4 pt-12 lg:pt-[75px] pb-16 lg:pb-32 z-10">
         <div className="max-w-4xl">
           {/* Content */}
           <div className="space-y-8 animate-in fade-in slide-in-from-left duration-700 relative z-10">
