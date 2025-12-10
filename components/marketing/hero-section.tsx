@@ -154,12 +154,12 @@ export function HeroSection() {
       <div className="absolute top-0 right-0 w-96 h-96 bg-blue-200/20 rounded-full blur-3xl -z-10"></div>
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl -z-10"></div>
       
-      <div className="relative max-w-[100rem] mx-auto px-3 sm:px-3 lg:px-4 pt-12 lg:pt-[75px] pb-16 lg:pb-32 z-10">
+      <div className="relative max-w-[100rem] mx-auto px-3 sm:px-3 lg:px-4 pt-[38px] lg:pt-[75px] pb-16 lg:pb-32 z-10">
         <div className="max-w-4xl">
           {/* Content */}
-          <div className="space-y-8 animate-in fade-in slide-in-from-left duration-700 relative z-10">
+          <div className="animate-in fade-in slide-in-from-left duration-700 relative z-10">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 border border-blue-200/50 rounded-full shadow-sm">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 border border-blue-200/50 rounded-full shadow-sm mb-6">
               <div className="flex items-center">
                 <Users size={16} className="text-blue-600 -mr-2" />
                 <Users size={16} className="text-purple-600 -mr-1" />
