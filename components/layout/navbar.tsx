@@ -395,7 +395,15 @@ export function Navbar({ onMenuClick, userName = "Usuário", sidebarOpen = true 
           </div>
 
           <div className="relative group">
-            <button className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg">
+            <button 
+              onClick={() => {
+                // No mobile, redireciona para configurações
+                if (window.innerWidth < 768) {
+                  router.push('/configuracoes');
+                }
+              }}
+              className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg"
+            >
               <div className="w-8 h-8 bg-color-primary-dark rounded-full flex items-center justify-center">
                 <User className="text-white" size={18} strokeWidth={2.5} />
               </div>
@@ -404,7 +412,8 @@ export function Navbar({ onMenuClick, userName = "Usuário", sidebarOpen = true 
               </span>
             </button>
 
-            <div className="absolute right-0 mt-0 w-48 bg-white rounded-lg border border-color-neutral-light opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all shadow-lg">
+            {/* Dropdown apenas no desktop (hover) */}
+            <div className="hidden md:block absolute right-0 mt-0 w-48 bg-white rounded-lg border border-color-neutral-light opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all shadow-lg">
               <div className="px-4 py-3 border-b border-gray-100">
                 <p className="text-xs text-gray-500">Conectado como</p>
                 <p className="text-sm font-medium text-gray-900 truncate">{userEmail}</p>

@@ -1,8 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Calendar, Users, FileText, DollarSign, Settings, LayoutGrid, Folder, X, ChevronDown, Shield, Key, Search, ClipboardList } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+import { Calendar, Users, FileText, DollarSign, Settings, LayoutGrid, Folder, X, ChevronDown, Shield, Key, Search, ClipboardList, LogOut } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useActivateKeyModal } from "@/contexts/activate-key-modal"
 
@@ -97,6 +97,7 @@ const getRolePermissions = (role: UserRole, isTrialActive: boolean): RolePermiss
 
 export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
   const pathname = usePathname()
+  const router = useRouter()
   const { openModal } = useActivateKeyModal()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [financeiroDropdownOpen, setFinanceiroDropdownOpen] = useState(false)
@@ -109,6 +110,12 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
   const [trialData, setTrialData] = useState<any>(null)
   const [isTrialActive, setIsTrialActive] = useState(false)
   const [isLoadingTrial, setIsLoadingTrial] = useState(true)
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    router.push('/login')
+  }
 
   // Detectar role do usuário
   useEffect(() => {
@@ -540,9 +547,9 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
             </div>
           )}
 
-          {/* Botão de Configurações - no final */}
+          {/* Botão de Configurações e Desconectar - no final */}
           {permissions.showConfiguracoes && (
-            <div className="mt-auto border-t border-color-neutral-light pt-4">
+            <div className="mt-auto border-t border-color-neutral-light pt-4 space-y-2">
               <Link
                 href="/configuracoes"
                 onClick={() => {
@@ -560,6 +567,19 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                 <Settings size={20} />
                 <span className="font-medium">Configurações</span>
               </Link>
+              <button
+                onClick={() => {
+                  handleLogout()
+                  // Fechar sidebar apenas em mobile ao clicar
+                  if (window.innerWidth < 1024 && onClose) {
+                    onClose()
+                  }
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-red-600 hover:bg-red-50"
+              >
+                <LogOut size={20} />
+                <span className="font-medium">Desconectar</span>
+              </button>
             </div>
           )}
         </nav>
