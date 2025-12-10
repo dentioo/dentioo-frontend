@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Loader2, CheckCircle, XCircle } from 'lucide-react'
 
-export default function GoogleAuthCallback() {
+function GoogleAuthCallbackContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
@@ -188,6 +188,22 @@ export default function GoogleAuthCallback() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function GoogleAuthCallback() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+          <Loader2 className="w-16 h-16 text-blue-600 animate-spin mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Carregando...</h2>
+          <p className="text-gray-600">Processando autenticação...</p>
+        </div>
+      </div>
+    }>
+      <GoogleAuthCallbackContent />
+    </Suspense>
   )
 }
 

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Navbar } from '@/components/layout/navbar'
 import { Check, ArrowLeft } from 'lucide-react'
@@ -51,7 +51,7 @@ const planDetails = {
   },
 }
 
-export default function PagamentoPage() {
+function PagamentoContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
@@ -244,5 +244,23 @@ export default function PagamentoPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function PagamentoPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-col h-screen bg-white">
+        <Navbar />
+        <div className="flex-1 bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Carregando...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <PagamentoContent />
+    </Suspense>
   )
 }

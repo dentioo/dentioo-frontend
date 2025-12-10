@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { PasswordResetForm } from "@/components/auth/password-reset-form"
 
-export default function PasswordResetPage() {
+function PasswordResetContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const token = searchParams.get('token')
@@ -23,4 +23,12 @@ export default function PasswordResetPage() {
   }, [router, token])
 
   return <PasswordResetForm />
+}
+
+export default function PasswordResetPage() {
+  return (
+    <Suspense fallback={<PasswordResetForm />}>
+      <PasswordResetContent />
+    </Suspense>
+  )
 }
