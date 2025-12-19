@@ -18,8 +18,7 @@ import {
   HardDrive,
   Filter,
   X,
-  CheckCircle2,
-  AlertCircle
+  CheckCircle2
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { ConfirmModal } from "@/components/ui/confirm-modal"
@@ -91,10 +90,7 @@ export default function ArquivosPage() {
   const [currentPlan, setCurrentPlan] = useState<string | null>(null)
   const [storageLimit, setStorageLimit] = useState<number>(0) // em bytes
   const [usedStorage, setUsedStorage] = useState<number>(0) // em bytes
-  const [authProvider, setAuthProvider] = useState<string | null>(null)
-  const [googleDriveConnected, setGoogleDriveConnected] = useState<boolean>(false)
-  const [checkingAuth, setCheckingAuth] = useState(true)
-  // Removido: apenas sistema (Google Drive do sistema/plano) é usado agora
+  // Upload sempre usa Google Drive do sistema (variáveis de ambiente)
 
   // Função para obter limite de armazenamento baseado no plano
   const getStorageLimit = (planName: string | null): number => {
@@ -115,57 +111,6 @@ export default function ArquivosPage() {
     }
   }
 
-  // Função para buscar informações do usuário
-  const fetchUserInfo = async () => {
-    try {
-      const token = localStorage.getItem("token")
-      if (!token) {
-        setCheckingAuth(false)
-        return
-      }
-
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-      const response = await fetch(`${apiUrl}/api/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        const user = data.data?.user
-        if (user) {
-          setAuthProvider(user.auth_provider || 'email')
-          setGoogleDriveConnected(user.google_drive_connected || false)
-        }
-      }
-    } catch (err) {
-      console.error('Erro ao buscar informações do usuário:', err)
-    } finally {
-      setCheckingAuth(false)
-    }
-  }
-
-  // Buscar informações do usuário (auth_provider e google_drive_connected)
-  useEffect(() => {
-    fetchUserInfo()
-  }, [])
-
-  // Verificar se voltou do callback do Google OAuth
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const googleAuth = urlParams.get('google_auth')
-    const error = urlParams.get('error')
-
-    if (googleAuth === 'success') {
-      // Atualizar informações do usuário após conexão bem-sucedida
-      fetchUserInfo()
-      // Limpar parâmetro da URL
-      window.history.replaceState({}, '', window.location.pathname)
-    } else if (error === 'auth_failed') {
-      alert('Erro ao conectar com Google. Tente novamente.')
-      // Limpar parâmetro da URL
-      window.history.replaceState({}, '', window.location.pathname)
-    }
-  }, [])
 
   // Buscar plano atual do usuário
   useEffect(() => {
@@ -252,13 +197,6 @@ export default function ArquivosPage() {
   }, [router])
 
   const handleFileUpload = async (file: File) => {
-    // Verificar se usuário está logado com Google
-    const isGoogleAuth = authProvider === 'google' || googleDriveConnected
-    if (!isGoogleAuth) {
-      alert("Você precisa estar logado com Google para fazer upload de arquivos. Por favor, conecte sua conta do Google.")
-      return
-    }
-
     // Verificar limite de armazenamento
     const newTotalSize = usedStorage + file.size
     
@@ -441,42 +379,8 @@ export default function ArquivosPage() {
     e.stopPropagation()
     setDragActive(false)
 
-    // Verificar se usuário está logado com Google
-    const isGoogleAuth = authProvider === 'google' || googleDriveConnected
-    if (!isGoogleAuth) {
-      return
-    }
-
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleFileUpload(e.dataTransfer.files[0])
-    }
-  }
-
-  const handleConnectGoogle = async () => {
-    try {
-      const token = localStorage.getItem("token")
-      if (!token) {
-        router.replace("/login")
-        return
-      }
-
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-      const response = await fetch(`${apiUrl}/api/files/google/auth`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-
-      if (!response.ok) {
-        throw new Error("Erro ao iniciar conexão com Google")
-      }
-
-      const data = await response.json()
-      if (data.success && data.authUrl) {
-        window.location.href = data.authUrl
-      } else {
-        alert("Erro ao iniciar conexão com Google")
-      }
-    } catch (err: any) {
-      alert(err.message || "Erro ao conectar com Google")
     }
   }
 
@@ -608,89 +512,51 @@ export default function ArquivosPage() {
       </div>
 
       {/* Upload Area */}
-      {checkingAuth ? (
-        <div className="mb-8 border-2 border-dashed rounded-2xl p-12 text-center">
-          <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
-          <p className="text-gray-600 font-medium mt-4">Verificando permissões...</p>
-        </div>
-      ) : (() => {
-        const isGoogleAuth = authProvider === 'google' || googleDriveConnected
-        return (
-          <div
-            className={`mb-8 border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-300 ${
-              !isGoogleAuth
-                ? 'border-red-300 bg-red-50 cursor-not-allowed opacity-75'
-                : dragActive
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-300 bg-gradient-to-br from-gray-50 to-white hover:border-blue-400 hover:bg-blue-50/50 cursor-pointer'
-            }`}
-            onDragEnter={isGoogleAuth ? handleDrag : undefined}
-            onDragLeave={isGoogleAuth ? handleDrag : undefined}
-            onDragOver={isGoogleAuth ? handleDrag : undefined}
-            onDrop={isGoogleAuth ? handleDrop : undefined}
-            onClick={isGoogleAuth ? () => fileInputRef.current?.click() : undefined}
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              className="hidden"
-              disabled={!isGoogleAuth}
-              onChange={(e) => {
-                if (e.target.files && e.target.files[0]) {
-                  handleFileUpload(e.target.files[0])
-                }
-              }}
-            />
-            {uploading ? (
-              <div className="space-y-4">
-                <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${uploadProgress}%` }}
-                  ></div>
-                </div>
-                <p className="text-gray-600 font-medium">Enviando arquivo...</p>
-              </div>
-            ) : !isGoogleAuth ? (
-              <>
-                <div className="inline-flex p-4 bg-red-100 rounded-full mb-4">
-                  <AlertCircle className="w-8 h-8 text-red-600" />
-                </div>
-                <p className="font-bold text-gray-900 text-lg mb-2">Upload bloqueado</p>
-                <p className="text-sm text-gray-600 mb-4">
-                  Você precisa estar logado com Google para fazer upload de arquivos.
-                </p>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleConnectGoogle()
-                  }}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg"
-                >
-                  <svg className="w-5 h-5" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"></path>
-                    <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"></path>
-                    <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"></path>
-                    <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"></path>
-                  </svg>
-                  Conectar com Google
-                </button>
-              </>
-            ) : (
-              <>
-                <div className="inline-flex p-4 bg-blue-100 rounded-full mb-4">
-                  <Upload className="w-8 h-8 text-blue-600" />
-                </div>
-                <p className="font-bold text-gray-900 text-lg mb-2">Clique para enviar ou arraste arquivos</p>
-                <p className="text-sm text-gray-600">
-                  Tamanho máximo por arquivo: 50MB | Armazenamento: {formatFileSize(usedStorage)} / {formatFileSize(storageLimit)} ({currentPlan || 'Free'})
-                </p>
-              </>
-            )}
+      <div
+        className={`mb-8 border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-300 ${
+          dragActive
+            ? 'border-blue-500 bg-blue-50'
+            : 'border-gray-300 bg-gradient-to-br from-gray-50 to-white hover:border-blue-400 hover:bg-blue-50/50 cursor-pointer'
+        }`}
+        onDragEnter={handleDrag}
+        onDragLeave={handleDrag}
+        onDragOver={handleDrag}
+        onDrop={handleDrop}
+        onClick={() => fileInputRef.current?.click()}
+      >
+        <input
+          ref={fileInputRef}
+          type="file"
+          className="hidden"
+          onChange={(e) => {
+            if (e.target.files && e.target.files[0]) {
+              handleFileUpload(e.target.files[0])
+            }
+          }}
+        />
+        {uploading ? (
+          <div className="space-y-4">
+            <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div
+                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${uploadProgress}%` }}
+              ></div>
+            </div>
+            <p className="text-gray-600 font-medium">Enviando arquivo...</p>
           </div>
-        )
-      })()}
+        ) : (
+          <>
+            <div className="inline-flex p-4 bg-blue-100 rounded-full mb-4">
+              <Upload className="w-8 h-8 text-blue-600" />
+            </div>
+            <p className="font-bold text-gray-900 text-lg mb-2">Clique para enviar ou arraste arquivos</p>
+            <p className="text-sm text-gray-600">
+              Tamanho máximo por arquivo: 50MB | Armazenamento: {formatFileSize(usedStorage)} / {formatFileSize(storageLimit)} ({currentPlan || 'Free'})
+            </p>
+          </>
+        )}
+      </div>
 
       {/* Tabs */}
       <div className="mb-6 border-b border-gray-200">
@@ -859,34 +725,15 @@ export default function ArquivosPage() {
                 <p className="text-gray-500 mb-6">
                   {searchTerm || fileTypeFilter !== 'all' ? 'Tente ajustar sua busca ou filtros' : 'Comece fazendo upload do seu primeiro arquivo'}
                 </p>
-                {!searchTerm && fileTypeFilter === 'all' && (() => {
-                  const isGoogleAuth = authProvider === 'google' || googleDriveConnected
-                  return isGoogleAuth ? (
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg"
-                    >
-                      <Upload size={20} />
-                      Fazer Upload
-                    </button>
-                  ) : (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleConnectGoogle()
-                      }}
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg"
-                    >
-                      <svg className="w-5 h-5" viewBox="0 0 24 24">
-                        <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"></path>
-                        <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"></path>
-                        <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"></path>
-                        <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"></path>
-                      </svg>
-                      Conectar com Google
-                    </button>
-                  )
-                })()}
+                {!searchTerm && fileTypeFilter === 'all' && (
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg"
+                  >
+                    <Upload size={20} />
+                    Fazer Upload
+                  </button>
+                )}
               </div>
             )}
           </>
